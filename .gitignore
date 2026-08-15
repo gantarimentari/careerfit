@@ -36,3 +36,6 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+CareerFit_AI_Backend_Kickoff.md
+CareerFit_AI.postman_collection (1).json    
