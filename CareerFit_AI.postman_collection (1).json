@@ -1,0 +1,416 @@
+{
+  "info": {
+    "name": "CareerFit AI API",
+    "description": "Collection testing backend CareerFit AI. Jalankan Register/Login dulu — token otomatis tersimpan ke environment variable {{token}} lewat script di tab Tests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.environment.set('token', body.token);",
+                  "  console.log('Token saved:', body.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Lala\",\n  \"email\": \"lala@mail.com\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.environment.set('token', body.token);",
+                  "  console.log('Token saved:', body.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"lala@mail.com\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Lala Baru\",\n  \"target_roles\": [\"Product Designer\", \"Backend Engineer\"]\n}"
+            },
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          },
+          "description": "Semua field opsional (name, email, target_roles). target_roles dipakai untuk subtitle personalisasi Dashboard."
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          },
+          "description": "HATI-HATI: ini beneran hapus akun secara permanen. Tes pakai akun dummy, bukan akun utama testing kamu."
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/logout", "host": ["{{base_url}}"], "path": ["logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CV",
+      "item": [
+        {
+          "name": "List CV",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/cv", "host": ["{{base_url}}"], "path": ["cv"] }
+          }
+        },
+        {
+          "name": "Create CV (Builder)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.environment.set('cv_id', body.id);",
+                  "  console.log('cv_id saved:', body.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"CV Utama\",\n  \"personal_info\": { \"full_name\": \"Sarah Al-Azhar\", \"email\": \"sarah@mail.com\", \"phone\": \"0812xxxxxx\", \"linkedin\": \"linkedin.com/in/sarah\" },\n  \"summary\": \"Fresh graduate Informatika, tertarik di bidang UI/UX dan pengembangan web.\",\n  \"skills\": [\"Figma\", \"React\", \"User Research\", \"SQL\"],\n  \"experience\": [\n    { \"company\": \"PT ABC\", \"role\": \"UI/UX Intern\", \"start\": \"2024-06\", \"end\": \"2024-12\", \"description\": \"Mendesain wireframe dan prototype untuk fitur checkout.\" }\n  ],\n  \"education\": [\n    { \"school\": \"Universitas Gadjah Mada\", \"degree\": \"S1 Informatika\", \"start\": \"2021\", \"end\": \"2025\" }\n  ],\n  \"projects\": [\n    { \"name\": \"CareerFit AI\", \"link\": \"github.com/example/careerfit\", \"description\": \"Platform analisis CV berbasis AI.\" }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/cv", "host": ["{{base_url}}"], "path": ["cv"] }
+          }
+        },
+        {
+          "name": "Get CV Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cv/{{cv_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cv", "{{cv_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update CV (Builder)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"summary\": \"Fresh graduate Informatika, tertarik di bidang UI/UX, pengembangan web, dan product design.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cv/{{cv_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cv", "{{cv_id}}"]
+            }
+          },
+          "description": "Pakai ini setelah CV pertama kali dibuat (bukan POST /cv lagi), supaya 'Simpan CV' update CV yang sama, bukan bikin baru."
+        },
+        {
+          "name": "Upload CV (PDF/DOCX)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.environment.set('cv_id', body.cv_id);",
+                  "  console.log('cv_id saved:', body.cv_id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/cv/upload", "host": ["{{base_url}}"], "path": ["cv", "upload"] }
+          },
+          "description": "Klik field 'file' di tab Body, pilih file .pdf atau .docx dari komputer sebelum kirim."
+        },
+        {
+          "name": "Analyze CV (ATS Score)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_id\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cv/{{cv_id}}/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["cv", "{{cv_id}}", "analyze"]
+            },
+            "description": "job_id boleh null (analisis umum) atau isi ID lowongan (analisis terhadap lowongan spesifik). Response bisa 5-15 detik, jangan panik kalau loading agak lama."
+          }
+        },
+        {
+          "name": "Generate Optimized CV",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cv/{{cv_id}}/generate",
+              "host": ["{{base_url}}"],
+              "path": ["cv", "{{cv_id}}", "generate"]
+            },
+            "description": "job_id wajib diisi (butuh data job_listings dulu, belum ada seed-nya)."
+          }
+        },
+        {
+          "name": "Download CV",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cv/{{cv_id}}/download",
+              "host": ["{{base_url}}"],
+              "path": ["cv", "{{cv_id}}", "download"]
+            }
+          },
+          "description": "MVP: return file .txt (attachment). Klik 'Send and Download' di Postman (bukan Send biasa) untuk lihat hasil file-nya."
+        }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "item": [
+        {
+          "name": "List Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/jobs?search=&location=&type=&work_mode=&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["jobs"],
+              "query": [
+                { "key": "search", "value": "" },
+                { "key": "location", "value": "" },
+                { "key": "type", "value": "" },
+                { "key": "work_mode", "value": "" },
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Job Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/jobs/1", "host": ["{{base_url}}"], "path": ["jobs", "1"] }
+          }
+        },
+        {
+          "name": "Job Match Score",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/jobs/1/match?cv_id={{cv_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["jobs", "1", "match"],
+              "query": [{ "key": "cv_id", "value": "{{cv_id}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Applications / Tracker",
+      "item": [
+        {
+          "name": "List Applications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/applications", "host": ["{{base_url}}"], "path": ["applications"] }
+          }
+        },
+        {
+          "name": "Create Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_id\": 1,\n  \"company\": \"Tokopedia\",\n  \"position\": \"Junior UI/UX Designer\",\n  \"applied_date\": \"2026-08-12\",\n  \"deadline\": \"2026-08-28\",\n  \"type\": \"fulltime\",\n  \"contact\": \"Diana R.\",\n  \"location\": \"Jakarta\",\n  \"status\": \"applied\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/applications", "host": ["{{base_url}}"], "path": ["applications"] }
+          }
+        },
+        {
+          "name": "Update Application Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"interview\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/applications/1", "host": ["{{base_url}}"], "path": ["applications", "1"] }
+          }
+        },
+        {
+          "name": "Delete Application",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/applications/1", "host": ["{{base_url}}"], "path": ["applications", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Summary",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/dashboard", "host": ["{{base_url}}"], "path": ["dashboard"] }
+          }
+        }
+      ]
+    }
+  ]
+}
