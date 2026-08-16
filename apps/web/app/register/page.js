@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import {
   UserIcon,
   MailIcon,
@@ -13,31 +15,55 @@ import {
 } from "@/components/Icons";
 
 export default function RegisterPage() {
+  const { register, isAuthenticated } = useAuth();
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, router]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
     if (password !== confirmPassword) {
-      alert("Konfirmasi kata sandi tidak cocok!");
+      setError("Konfirmasi kata sandi tidak cocok!");
       return;
     }
-    console.log("Register submitted", { fullName, email, password, agreeTerms });
+
+    if (password.length < 8) {
+      setError("Kata sandi minimal 8 karakter!");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const res = await register(fullName, email, password);
+    setIsSubmitting(false);
+
+    if (res.success) {
+      router.push("/dashboard");
+    } else {
+      setError(res.error);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#FDF8F1] text-[#243449] flex flex-col justify-between p-4 sm:p-6 lg:p-8 relative overflow-hidden selection:bg-[#ffba17]/30">
 
-
-
       {/* Background Canvas Graphics & Decorative Illustrations (Left & Right Canvas) */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-
         {/* Decorative Background Squiggles & Gradients */}
         <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-radial from-[#40789B]/10 via-[#ffba17]/5 to-transparent " />
 
@@ -53,15 +79,8 @@ export default function RegisterPage() {
 
         {/* LEFT CANVAS ILLUSTRATIONS & CARDS */}
         <div className="absolute left-[3%] sm:left-[6%] lg:left-[8%] top-1/2 -translate-y-1/2 hidden md:flex flex-col items-center gap-6 max-w-[260px] xl:max-w-[320px] transition-all">
-          {/* LEFT CANVAS: Clean & Minimalist Organic Blobs */}
           <div className="absolute left-[2%] sm:left-[5%] lg:left-[8%] top-1/2 -translate-y-1/2 hidden md:block w-[300px] xl:w-[380px] h-[400px] pointer-events-none z-0">
-
-            {/* Blob Utama (Warm Yellow Glow) */}
-            <div className="absolute bottom-3/4 left-3/4 w-40 h-40 bg-[#ffba17]/15 rounded-full  animate-pulse duration-1000" />
-
-
-
-            {/* Shape Abstrak Vektor Murni (Tanpa Teks / Tanpa Card) */}
+            <div className="absolute bottom-3/4 left-3/4 w-40 h-40 bg-[#ffba17]/15 rounded-full animate-pulse duration-1000" />
             <svg
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full text-[#ffba17]/10"
               viewBox="0 0 200 200"
@@ -74,14 +93,10 @@ export default function RegisterPage() {
               />
             </svg>
           </div>
-          {/* Blob Kedua (Muted Blue Gradient) */}
-          <div className="absolute  right-0 w-72 h-72 bg-red-300/70 rounded-full " />
         </div>
 
         {/* RIGHT CANVAS ILLUSTRATIONS & GRAPHIC */}
         <div className="absolute right-[3%] sm:right-[6%] lg:right-[8%] top-1/2 -translate-y-1/2 hidden md:flex flex-col items-center gap-4 max-w-[260px] xl:max-w-[320px] transition-all">
-
-          {/* Main Hero Register Illustration */}
           <div className="relative w-56 h-56 xl:w-64 xl:h-64 aspect-square">
             <Image
               src="/landing-page/lp-4.png"
@@ -91,15 +106,12 @@ export default function RegisterPage() {
               className="object-contain drop-shadow-lg transform rotate-2 hover:rotate-0 transition-transform duration-500"
             />
           </div>
-
-
         </div>
-
       </div>
 
       {/* Main Content Area: CENTER FLOATING CARD */}
       <main className="my-auto mx-auto w-full max-w-[460px] sm:max-w-[480px] py-6 relative z-20">
-        <div className="bg-white rounded-2xl border-[1px] border-[#E2EBF2]   p-8 sm:p-10 ">
+        <div className="bg-white rounded-2xl border-[1px] border-[#E2EBF2] p-8 sm:p-10 shadow-sm">
           {/* Header Inside Card */}
           <div className="text-center mb-6">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#243449] tracking-tight">
@@ -109,6 +121,16 @@ export default function RegisterPage() {
               Lengkapi data kamu untuk mendaftar akun baru di CareerFit.
             </p>
           </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm flex items-center gap-2">
+              <svg className="w-5 h-5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{error}</span>
+            </div>
+          )}
 
           {/* Register Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -126,7 +148,8 @@ export default function RegisterPage() {
                   placeholder="Nama Lengkap Anda"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full rounded-2xl border border-[#D5DFE8] bg-[#F9FBFC] pl-12 pr-4 py-3 text-xs sm:text-sm text-[#243449] placeholder-[#A0B0C0] focus:border-[#2E6385] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#2E6385]/10 transition-all duration-200"
+                  disabled={isSubmitting}
+                  className="w-full rounded-2xl border border-[#D5DFE8] bg-[#F9FBFC] pl-12 pr-4 py-3 text-xs sm:text-sm text-[#243449] placeholder-[#A0B0C0] focus:border-[#2E6385] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#2E6385]/10 transition-all duration-200 disabled:opacity-50"
                 />
               </div>
             </div>
@@ -145,7 +168,8 @@ export default function RegisterPage() {
                   placeholder="nama@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-2xl border border-[#D5DFE8] bg-[#F9FBFC] pl-12 pr-4 py-3 text-xs sm:text-sm text-[#243449] placeholder-[#A0B0C0] focus:border-[#2E6385] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#2E6385]/10 transition-all duration-200"
+                  disabled={isSubmitting}
+                  className="w-full rounded-2xl border border-[#D5DFE8] bg-[#F9FBFC] pl-12 pr-4 py-3 text-xs sm:text-sm text-[#243449] placeholder-[#A0B0C0] focus:border-[#2E6385] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#2E6385]/10 transition-all duration-200 disabled:opacity-50"
                 />
               </div>
             </div>
@@ -164,7 +188,8 @@ export default function RegisterPage() {
                   placeholder="Minimal 8 karakter"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-2xl border border-[#D5DFE8] bg-[#F9FBFC] pl-12 pr-16 py-3 text-xs sm:text-sm text-[#243449] placeholder-[#A0B0C0] focus:border-[#2E6385] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#2E6385]/10 transition-all duration-200"
+                  disabled={isSubmitting}
+                  className="w-full rounded-2xl border border-[#D5DFE8] bg-[#F9FBFC] pl-12 pr-16 py-3 text-xs sm:text-sm text-[#243449] placeholder-[#A0B0C0] focus:border-[#2E6385] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#2E6385]/10 transition-all duration-200 disabled:opacity-50"
                 />
                 <button
                   type="button"
@@ -190,7 +215,8 @@ export default function RegisterPage() {
                   placeholder="Ulangi kata sandi"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-2xl border border-[#D5DFE8] bg-[#F9FBFC] pl-12 pr-16 py-3 text-xs sm:text-sm text-[#243449] placeholder-[#A0B0C0] focus:border-[#2E6385] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#2E6385]/10 transition-all duration-200"
+                  disabled={isSubmitting}
+                  className="w-full rounded-2xl border border-[#D5DFE8] bg-[#F9FBFC] pl-12 pr-16 py-3 text-xs sm:text-sm text-[#243449] placeholder-[#A0B0C0] focus:border-[#2E6385] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#2E6385]/10 transition-all duration-200 disabled:opacity-50"
                 />
                 <button
                   type="button"
@@ -202,14 +228,23 @@ export default function RegisterPage() {
               </div>
             </div>
 
-
-
             {/* Primary Action Button */}
             <button
               type="submit"
-              className="w-full py-3.5 px-6 rounded-2xl bg-[#ffba17] hover:bg-[#f0ad10] active:scale-[0.99] text-[#243449] font-extrabold text-sm sm:text-base transition-all cursor-pointer mt-2"
+              disabled={isSubmitting}
+              className="w-full py-3.5 px-6 rounded-2xl bg-[#ffba17] hover:bg-[#f0ad10] active:scale-[0.99] text-[#243449] font-extrabold text-sm sm:text-base transition-all cursor-pointer mt-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Daftar Sekarang
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-[#243449]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Mendaftarkan...</span>
+                </>
+              ) : (
+                "Daftar Sekarang"
+              )}
             </button>
           </form>
 
@@ -230,5 +265,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-
-

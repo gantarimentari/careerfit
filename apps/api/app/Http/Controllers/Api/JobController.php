@@ -1,0 +1,118 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Cv;
+use App\Models\Job;
+use Illuminate\Http\Request;
+use App\Services\AiService;
+
+class JobController extends Controller
+{
+
+    public function __construct(private AiService $ai)
+    {
+    }
+    public function index(Request $request)
+    {
+        $query = Job::query();
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('company', 'like', "%{$search}%")
+                  ->orWhereJsonContains('required_skills', $search);
+            });
+        }
+
+        if ($location = $request->query('location')) {
+            $query->where('location', 'like', "%{$location}%");
+        }
+
+        if ($type = $request->query('type')) {
+            $query->where('type', $type);
+        }
+
+        if ($workMode = $request->query('work_mode')) {
+            $query->where('work_mode', $workMode);
+        }
+
+        $perPage = 10;
+        $page = max((int) $request->query('page', 1), 1);
+
+        $paginated = $query->orderByDesc('posted_at')->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json([
+            'data' => $paginated->items(),
+            'meta' => [
+                'page' => $paginated->currentPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+            ],
+        ]);
+    }
+
+    // GET /api/jobs/{id}
+    public function show($id)
+    {
+        $job = Job::findOrFail($id);
+        return response()->json($job);
+    }
+
+// GET /api/jobs/{id}/match?cv_id=5
+    public function match(Request $request, $id)
+    {
+        $job = Job::findOrFail($id);
+
+        $cvId = $request->query('cv_id');
+        if (! $cvId) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => ['cv_id' => ['cv_id wajib diisi']],
+            ], 422);
+        }
+
+        $cv = Cv::where('user_id', $request->user()->id)->findOrFail($cvId);
+
+        $cvText = $cv->parsed_text ?: $this->buildCvText($cv);
+
+        if (empty(trim($cvText))) {
+            return response()->json([
+                'match_score' => 0,
+                'matched_keywords' => [],
+                'missing_keywords' => [],
+            ]);
+        }
+
+        try {
+            $result = $this->ai->matchCvToJob($cvText, $job->description ?? '');
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Analisis kecocokan gagal, coba lagi'], 500);
+        }
+
+        return response()->json([
+            'match_score' => $result['match_score'] ?? 0,
+            'matched_keywords' => $result['matched_keywords'] ?? [],
+            'missing_keywords' => $result['missing_keywords'] ?? [],
+        ]);
+    }
+
+    private function buildCvText(Cv $cv): string
+    {
+        $parts = [
+            $cv->summary,
+            'Skills: ' . implode(', ', $cv->skills ?? []),
+        ];
+
+        foreach ($cv->experience ?? [] as $exp) {
+            $parts[] = ($exp['role'] ?? '') . ' at ' . ($exp['company'] ?? '') . ': ' . ($exp['description'] ?? '');
+        }
+
+        foreach ($cv->education ?? [] as $edu) {
+            $parts[] = ($edu['degree'] ?? '') . ' - ' . ($edu['school'] ?? '');
+        }
+
+        return implode("\n", array_filter($parts));
+    }
+}
