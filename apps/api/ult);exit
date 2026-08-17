@@ -1,0 +1,45 @@
+[90m= [39m[
+    [34m"[39m[34mats_score[39m[34m"[39m => [35m35[39m,
+    [34m"[39m[34mheadline[39m[34m"[39m => [32m"[39m[32mCV Anda memiliki fondasi keahlian yang potensial, namun membutuhkan penambahan struktur detail dan proyek nyata untuk meloloskan Anda dari sistem ATS.[39m[32m"[39m,
+    [34m"[39m[34mstrengths[39m[34m"[39m => [
+      [
+        [34m"[39m[34mtitle[39m[34m"[39m => [32m"[39m[32mKombinasi Skill Relevan[39m[32m"[39m,
+        [34m"[39m[34mdescription[39m[34m"[39m => [32m"[39m[32mPenguasaan React, Figma, dan SQL sangat dicari untuk posisi Frontend Developer, UI/UX Designer, maupun Fullstack Developer pemula.[39m[32m"[39m,
+      ],
+      [
+        [34m"[39m[34mtitle[39m[34m"[39m => [32m"[39m[32mLatar Belakang Pendidikan Sesuai[39m[32m"[39m,
+        [34m"[39m[34mdescription[39m[34m"[39m => [32m"[39m[32mLulusan Informatika memberikan nilai tambah berupa pemahaman dasar ilmu komputer yang kuat di mata rekruter.[39m[32m"[39m,
+      ],
+    ],
+    [34m"[39m[34mimprovements[39m[34m"[39m => [
+      [
+        [34m"[39m[34mtitle[39m[34m"[39m => [32m"[39m[32mKurangnya Detail Pengalaman dan Proyek[39m[32m"[39m,
+        [34m"[39m[34mdescription[39m[34m"[39m => [32m"[39m[32mCV belum mencantumkan proyek akademis, magang, portofolio, atau aplikasi nyata yang pernah dibuat menggunakan React, Figma, dan SQL.[39m[32m"[39m,
+      ],
+      [
+        [34m"[39m[34mtitle[39m[34m"[39m => [32m"[39m[32mKelengkapan Dokumen Sangat Minim[39m[32m"[39m,
+        [34m"[39m[34mdescription[39m[34m"[39m => [32m"[39m[32mTidak ada informasi mengenai riwayat pendidikan lengkap, kontak, profil profesional, maupun pencapaian kuantitatif.[39m[32m"[39m,
+      ],
+    ],
+    [34m"[39m[34msuggestions[39m[34m"[39m => [
+      [
+        [34m"[39m[34msection[39m[34m"[39m => [32m"[39m[32mPengalaman Proyek / Portofolio[39m[32m"[39m,
+        [34m"[39m[34mtip[39m[34m"[39m => [32m"[39m[32mCantumkan 2-3 proyek terbaik yang pernah dikerjakan dengan menyebutkan peran, teknologi yang digunakan, serta hasilnya.[39m[32m"[39m,
+        [34m"[39m[34mexample[39m[34m"[39m => [32m"[39m[32mPengembang Web - Aplikasi E-Commerce (2023): Merancang UI/UX menggunakan Figma dan membangun antarmuka utama dengan React.js serta optimasi query SQL.[39m[32m"[39m,
+      ],
+      [
+        [34m"[39m[34msection[39m[34m"[39m => [32m"[39m[32mRingkasan Profil (Professional Summary)[39m[32m"[39m,
+        [34m"[39m[34mtip[39m[34m"[39m => [32m"[39m[32mTambahkan 2-3 kalimat ringkas di bagian atas CV yang menggambarkan fokus karir dan nilai utama Anda.[39m[32m"[39m,
+        [34m"[39m[34mexample[39m[34m"[39m => [32m"[39m[32mLulusan Informatika yang berfokus pada pengembangan Frontend Web dan Desain UI/UX. Terbiasa membangun aplikasi web responsif menggunakan React, Figma, dan integrasi database SQL.[39m[32m"[39m,
+      ],
+    ],
+    [34m"[39m[34mkeyword_gaps[39m[34m"[39m => [
+      [32m"[39m[32mJavaScript[39m[32m"[39m,
+      [32m"[39m[32mGit / GitHub[39m[32m"[39m,
+      [32m"[39m[32mREST API[39m[32m"[39m,
+      [32m"[39m[32mHTML5 / CSS3[39m[32m"[39m,
+      [32m"[39m[32mResponsive Design[39m[32m"[39m,
+      [32m"[39m[32mAgile / Scrum[39m[32m"[39m,
+      [32m"[39m[32mPortofolio[39m[32m"[39m,
+    ],
+  ]

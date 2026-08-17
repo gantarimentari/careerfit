@@ -30,6 +30,7 @@ class AiService
         $result = $this->callWithFallback($prompt, expectJson: false);
         return $result['raw_text'] ?? '';
     }
+
     public function matchCvToJob(string $cvText, string $jobDescription): array
     {
         $prompt = <<<PROMPT
@@ -50,6 +51,32 @@ class AiService
 
         CV Kandidat:
         {$cvText}
+        PROMPT;
+
+        return $this->callWithFallback($prompt);
+    }
+
+    public function matchCvToJobs(string $cvText, array $jobs): array
+    {
+        $jobLines = collect($jobs)->map(function ($job) {
+            $skills = implode(', ', $job['required_skills'] ?? []);
+            return "- id={$job['id']}, judul=\"{$job['title']}\" di {$job['company']}, skill dibutuhkan: {$skills}";
+        })->implode("\n");
+
+        $prompt = <<<PROMPT
+        Kamu adalah sistem rekomendasi pekerjaan. Berdasarkan CV kandidat berikut, nilai
+        seberapa cocok kandidat ini dengan MASING-MASING lowongan di bawah — pertimbangkan
+        skill, pengalaman, dan relevansi bidang secara menyeluruh, bukan cuma exact keyword.
+
+        Kembalikan HANYA JSON array valid (tanpa markdown, tanpa penjelasan tambahan),
+        satu object per lowongan, PERSIS struktur ini:
+        [{"job_id": <int>, "match_score": <integer 0-100>}]
+
+        CV Kandidat:
+        {$cvText}
+
+        Daftar Lowongan:
+        {$jobLines}
         PROMPT;
 
         return $this->callWithFallback($prompt);
@@ -79,10 +106,12 @@ class AiService
             $body['generationConfig'] = ['response_mime_type' => 'application/json'];
         }
 
-        $response = Http::timeout(30)->post(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . env('GEMINI_API_KEY'),
-            $body
-        )->throw()->json();
+        $response = Http::timeout(30)
+            ->withHeaders(['x-goog-api-key' => env('GEMINI_API_KEY')])
+            ->post(
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent',
+                $body
+            )->throw()->json();
 
         $text = $response['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
@@ -94,7 +123,7 @@ class AiService
         $response = Http::timeout(30)->withToken(env('GROQ_API_KEY'))->post(
             'https://api.groq.com/openai/v1/chat/completions',
             [
-                'model' => 'llama-3.3-70b-versatile',
+                'model' => 'openai/gpt-oss-120b',
                 'messages' => [['role' => 'user', 'content' => $prompt]],
                 'response_format' => $expectJson ? ['type' => 'json_object'] : null,
             ]
@@ -110,7 +139,7 @@ class AiService
         $response = Http::timeout(30)->withToken(env('OPENROUTER_API_KEY'))->post(
             'https://openrouter.ai/api/v1/chat/completions',
             [
-                'model' => 'meta-llama/llama-3.3-70b-instruct:free',
+                'model' => 'openai/gpt-oss-20b:free',
                 'messages' => [['role' => 'user', 'content' => $prompt]],
             ]
         )->throw()->json();
@@ -153,30 +182,5 @@ class AiService
         CV:
         {$cvText}
         PROMPT;
-    }
-    public function matchCvToJobs(string $cvText, array $jobs): array
-    {
-        $jobLines = collect($jobs)->map(function ($job) {
-            $skills = implode(', ', $job['required_skills'] ?? []);
-            return "- id={$job['id']}, judul=\"{$job['title']}\" di {$job['company']}, skill dibutuhkan: {$skills}";
-        })->implode("\n");
-
-        $prompt = <<<PROMPT
-        Kamu adalah sistem rekomendasi pekerjaan. Berdasarkan CV kandidat berikut, nilai
-        seberapa cocok kandidat ini dengan MASING-MASING lowongan di bawah — pertimbangkan
-        skill, pengalaman, dan relevansi bidang secara menyeluruh, bukan cuma exact keyword.
-
-        Kembalikan HANYA JSON array valid (tanpa markdown, tanpa penjelasan tambahan),
-        satu object per lowongan, PERSIS struktur ini:
-        [{"job_id": <int>, "match_score": <integer 0-100>}]
-
-        CV Kandidat:
-        {$cvText}
-
-        Daftar Lowongan:
-        {$jobLines}
-        PROMPT;
-
-        return $this->callWithFallback($prompt);
     }
 }
